@@ -15,13 +15,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Button button = findViewById(R.id.btnLaunchActivity);
         // Implement onClickListener for btnLaunchActivity button
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "On Click on the Launch Detail Activity button");
-                launchDetailActivity("This message came from MainActivity");
+                launchDetailActivity("US");
             }
         });
     }
