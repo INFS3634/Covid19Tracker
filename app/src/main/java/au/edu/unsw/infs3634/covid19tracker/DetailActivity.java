@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class DetailActivity extends AppCompatActivity {
@@ -41,17 +42,18 @@ public class DetailActivity extends AppCompatActivity {
             ArrayList<Country> countries = Country.getCountries();
             for(final Country country : countries) {
                 if (country.getCountryCode().equals(countryCode)) {
+                    DecimalFormat df = new DecimalFormat( "#,###,###,###" );
                     // Set title of the activity
                     setTitle(country.getCountryCode());
                     // Set the country name
                     mCountry.setText(country.getCountry());
                     // Set value for all other text view elements
-                    mNewCases.setText(country.getNewConfirmed().toString());
-                    mTotalCases.setText(country.getTotalConfirmed().toString());
-                    mNewDeaths.setText(country.getNewDeaths().toString());
-                    mTotalDeaths.setText(country.getTotalDeaths().toString());
-                    mNewRecovered.setText(country.getNewRecovered().toString());
-                    mTotalRecovered.setText(country.getTotalRecovered().toString());
+                    mNewCases.setText(df.format(country.getNewConfirmed()));
+                    mTotalCases.setText(df.format(country.getTotalConfirmed()));
+                    mNewDeaths.setText(df.format(country.getNewDeaths()));
+                    mTotalDeaths.setText(df.format(country.getTotalDeaths()));
+                    mNewRecovered.setText(df.format(country.getNewRecovered()));
+                    mTotalRecovered.setText(df.format(country.getTotalRecovered()));
                     // Add an intent to open Google search for "Covid19" + country name
                     mSearch.setOnClickListener(new View.OnClickListener() {
                         @Override
