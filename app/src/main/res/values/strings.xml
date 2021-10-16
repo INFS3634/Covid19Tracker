@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Covid19Tracker</string>
     <string name="welcome_message">Hello From Covid19Tracker App!</string>
+    <string name="action_sort">Sort</string>
+    <string name="action_search">Search</string>
+    <string name="sort_new">New Cases</string>
+    <string name="sort_total">Total Cases</string>
 </resources>
