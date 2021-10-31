@@ -14,16 +14,17 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryViewHolder> implements Filterable {
-    private ArrayList<Country> mCountries, mCountriesFiltered;
+    private List<Country> mCountries, mCountriesFiltered;
     private RecyclerViewClickListener mListener;
     public static final int SORT_METHOD_NEW = 1;
     public static final int SORT_METHOD_TOTAL = 2;
 
 
     // A constructor method for the adapter class
-    public CountryAdapter(ArrayList<Country> countries, RecyclerViewClickListener listener){
+    public CountryAdapter(List<Country> countries, RecyclerViewClickListener listener){
         mCountries = countries;
         mCountriesFiltered = countries;
         mListener = listener;

@@ -11,8 +11,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DetailActivity extends AppCompatActivity {
     private static final String TAG = "DetailActivity";
@@ -39,7 +42,10 @@ public class DetailActivity extends AppCompatActivity {
         if (intent.hasExtra(INTENT_MESSAGE)) {
             Log.d(TAG, "INTENT_MESSAGE = " + bundle.getStringArrayList(INTENT_MESSAGE) );
             String countryCode = intent.getStringExtra(INTENT_MESSAGE);
-            ArrayList<Country> countries = Country.getCountries();
+            // Implement Gson library
+            Gson gson = new Gson();
+            Response response = gson.fromJson(Response.json, Response.class);
+            List<Country> countries = response.getCountries();
             for(final Country country : countries) {
                 if (country.getCountryCode().equals(countryCode)) {
                     DecimalFormat df = new DecimalFormat( "#,###,###,###" );

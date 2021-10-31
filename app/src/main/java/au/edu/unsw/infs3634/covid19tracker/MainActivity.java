@@ -15,6 +15,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SearchView;
 
+import com.google.gson.Gson;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private RecyclerView mRecyclerView;
@@ -42,8 +44,12 @@ public class MainActivity extends AppCompatActivity {
                 launchDetailActivity(countryCode);
             }
         };
+        // Implement Gson library
+        Gson gson = new Gson();
+        Response response = gson.fromJson(Response.json, Response.class);
+
         // Create an adapter and supply the countries data to be displayed
-        mAdapter = new CountryAdapter(Country.getCountries(), listener);
+        mAdapter = new CountryAdapter(response.getCountries(), listener);
         // Connect the adapter with the RecyclerView
         mRecyclerView.setAdapter(mAdapter);
 
