@@ -17,6 +17,11 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class DetailActivity extends AppCompatActivity {
     private static final String TAG = "DetailActivity";
     public static final String INTENT_MESSAGE = "au.edu.unsw.infs3634.covid19tracker.intent_message";
@@ -43,33 +48,54 @@ public class DetailActivity extends AppCompatActivity {
             Log.d(TAG, "INTENT_MESSAGE = " + bundle.getStringArrayList(INTENT_MESSAGE) );
             String countryCode = intent.getStringExtra(INTENT_MESSAGE);
             // Implement Gson library
-            Gson gson = new Gson();
-            Response response = gson.fromJson(Response.json, Response.class);
-            List<Country> countries = response.getCountries();
-            for(final Country country : countries) {
-                if (country.getCountryCode().equals(countryCode)) {
-                    DecimalFormat df = new DecimalFormat( "#,###,###,###" );
-                    // Set title of the activity
-                    setTitle(country.getCountryCode());
-                    // Set the country name
-                    mCountry.setText(country.getCountry());
-                    // Set value for all other text view elements
-                    mNewCases.setText(df.format(country.getNewConfirmed()));
-                    mTotalCases.setText(df.format(country.getTotalConfirmed()));
-                    mNewDeaths.setText(df.format(country.getNewDeaths()));
-                    mTotalDeaths.setText(df.format(country.getTotalDeaths()));
-                    mNewRecovered.setText(df.format(country.getNewRecovered()));
-                    mTotalRecovered.setText(df.format(country.getTotalRecovered()));
-                    // Add an intent to open Google search for "Covid19" + country name
-                    mSearch.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com.au/search?q=covid " + country.getCountry()));
-                            startActivity(intent);
+//            Gson gson = new Gson();
+//            Response response = gson.fromJson(Response.json, Response.class);
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("https://api.covid19api.com/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            CovidService service = retrofit.create(CovidService.class);
+            Call<Response> responseCall = service.getResponse();
+            responseCall.enqueue(new Callback<Response>() {
+                @Override
+                public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                    Log.d(TAG, "API call successful");
+                    List<Country> countries = response.body().getCountries();
+                    for(final Country country : countries) {
+                        if (country.getCountryCode().equals(countryCode)) {
+                            DecimalFormat df = new DecimalFormat( "#,###,###,###" );
+                            // Set title of the activity
+                            setTitle(country.getCountryCode());
+                            // Set the country name
+                            mCountry.setText(country.getCountry());
+                            // Set value for all other text view elements
+                            mNewCases.setText(df.format(country.getNewConfirmed()));
+                            mTotalCases.setText(df.format(country.getTotalConfirmed()));
+                            mNewDeaths.setText(df.format(country.getNewDeaths()));
+                            mTotalDeaths.setText(df.format(country.getTotalDeaths()));
+                            mNewRecovered.setText(df.format(country.getNewRecovered()));
+                            mTotalRecovered.setText(df.format(country.getTotalRecovered()));
+                            // Add an intent to open Google search for "Covid19" + country name
+                            mSearch.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com.au/search?q=covid " + country.getCountry()));
+                                    startActivity(intent);
+                                }
+                            });
                         }
-                    });
+                    }
+
                 }
-            }
+
+                @Override
+                public void onFailure(Call<Response> call, Throwable t) {
+                    Log.d(TAG, "API call fails");
+                }
+            });
+
+
+
         }
     }
 }

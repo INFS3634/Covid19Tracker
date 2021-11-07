@@ -17,6 +17,14 @@ import android.widget.SearchView;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private RecyclerView mRecyclerView;
@@ -44,14 +52,34 @@ public class MainActivity extends AppCompatActivity {
                 launchDetailActivity(countryCode);
             }
         };
-        // Implement Gson library
-        Gson gson = new Gson();
-        Response response = gson.fromJson(Response.json, Response.class);
 
         // Create an adapter and supply the countries data to be displayed
-        mAdapter = new CountryAdapter(response.getCountries(), listener);
+        mAdapter = new CountryAdapter(new ArrayList<Country>(), listener);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.covid19api.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        CovidService service = retrofit.create(CovidService.class);
+        Call<Response> responseCall = service.getResponse();
+
+        responseCall.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                Log.d(TAG, "API call successful");
+                List<Country> countries = response.body().getCountries();
+                mAdapter.setCountry(countries);
+                // Connect the adapter with the RecyclerView
+                mRecyclerView.setAdapter(mAdapter);
+            }
+
+            @Override
+            public void onFailure(Call<Response> call, Throwable t) {
+                Log.d(TAG, "API call fails");
+            }
+        });
         // Connect the adapter with the RecyclerView
-        mRecyclerView.setAdapter(mAdapter);
+        //mRecyclerView.setAdapter(mAdapter);
 
     }
 

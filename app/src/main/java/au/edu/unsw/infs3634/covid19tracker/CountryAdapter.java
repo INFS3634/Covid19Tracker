@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -130,6 +131,12 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
                 }
             });
         }
+        notifyDataSetChanged();
+    }
+
+    public void setCountry(List<Country> data){
+        mCountriesFiltered.clear();
+        mCountriesFiltered.addAll(data);
         notifyDataSetChanged();
     }
 }
