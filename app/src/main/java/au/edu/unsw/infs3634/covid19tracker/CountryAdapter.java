@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,6 +83,11 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         // Retrieve the country by it's position in filtered list
         Country country = mCountriesFiltered.get(position);
         DecimalFormat df = new DecimalFormat( "#,###,###,###" );
+        Glide.with(holder.itemView)
+                .load("https://flagcdn.com/96x72/" + country.getCountryCode().toLowerCase() + ".png")
+                .fitCenter()
+                .into(holder.flag);
+
         holder.country.setText(country.getCountry());
         holder.totalCases.setText(df.format(country.getTotalConfirmed()));
         holder.newCases.setText("+" + df.format(country.getNewConfirmed()));
@@ -96,6 +103,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
     // Extend the signature of CountryViewHolder to implement a click listener
     public static class CountryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView country, totalCases, newCases;
+        private ImageView flag;
         private RecyclerViewClickListener listener;
 
         // A constructor method for CountryViewHolder class
@@ -103,6 +111,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
             super(itemView);
             this.listener = listener;
             itemView.setOnClickListener(this);
+            flag = itemView.findViewById(R.id.ivFlag);
             country = itemView.findViewById(R.id.tvCountry);
             totalCases = itemView.findViewById(R.id.tvTotalCases);
             newCases = itemView.findViewById(R.id.tvNewCases);

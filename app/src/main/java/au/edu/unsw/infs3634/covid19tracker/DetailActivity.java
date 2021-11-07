@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 
 import java.text.DecimalFormat;
@@ -26,7 +27,7 @@ public class DetailActivity extends AppCompatActivity {
     private static final String TAG = "DetailActivity";
     public static final String INTENT_MESSAGE = "au.edu.unsw.infs3634.covid19tracker.intent_message";
     private TextView mCountry, mNewCases, mTotalCases, mNewDeaths, mTotalDeaths, mNewRecovered, mTotalRecovered;
-    private ImageView mSearch;
+    private ImageView mSearch, mFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +41,7 @@ public class DetailActivity extends AppCompatActivity {
         mNewRecovered = findViewById(R.id.tvNewRecovered);
         mTotalRecovered = findViewById(R.id.tvTotalRecovered);
         mSearch = findViewById(R.id.ivSearch);
+        mFlag = findViewById(R.id.ivFlag);
 
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
@@ -47,9 +49,7 @@ public class DetailActivity extends AppCompatActivity {
         if (intent.hasExtra(INTENT_MESSAGE)) {
             Log.d(TAG, "INTENT_MESSAGE = " + bundle.getStringArrayList(INTENT_MESSAGE) );
             String countryCode = intent.getStringExtra(INTENT_MESSAGE);
-            // Implement Gson library
-//            Gson gson = new Gson();
-//            Response response = gson.fromJson(Response.json, Response.class);
+
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl("https://api.covid19api.com/")
                     .addConverterFactory(GsonConverterFactory.create())
@@ -66,6 +66,11 @@ public class DetailActivity extends AppCompatActivity {
                             DecimalFormat df = new DecimalFormat( "#,###,###,###" );
                             // Set title of the activity
                             setTitle(country.getCountryCode());
+                            Glide.with(DetailActivity.this)
+                                    .load("https://flagcdn.com/96x72/" + country.getCountryCode().toLowerCase() + ".png")
+                                    .fitCenter()
+                                    .into(mFlag);
+
                             // Set the country name
                             mCountry.setText(country.getCountry());
                             // Set value for all other text view elements
