@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private CountryAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private CountyDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +55,25 @@ public class MainActivity extends AppCompatActivity {
                 launchDetailActivity(countryCode);
             }
         };
-
         // Create an adapter and supply the countries data to be displayed
         mAdapter = new CountryAdapter(new ArrayList<Country>(), listener);
+        // Connect the adapter with the RecyclerView
+        mRecyclerView.setAdapter(mAdapter);
 
+        //Instantiate a CountryDatabase object
+        mDb = Room.databaseBuilder(getApplicationContext(), CountyDatabase.class, "country-database").build();
+
+        // Create an asynchronous database call using Java Runnable to:
+        // get the list of countries from the database
+        // Set the adapter using the result
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<Country> countries = (ArrayList<Country>) mDb.countryDao().getCountries();
+                mAdapter.setCountry(countries);
+                mAdapter.sort(CountryAdapter.SORT_METHOD_NEW);
+            }
+        });
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.covid19api.com/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -67,20 +85,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
                 Log.d(TAG, "API call successful");
-                List<Country> countries = response.body().getCountries();
-                mAdapter.setCountry(countries);
-                // Connect the adapter with the RecyclerView
-                mRecyclerView.setAdapter(mAdapter);
+                // Create an asynchronous database call using Java Runnable to:
+                // Delete all rows currently in the database
+                // Add all rows from API call result into the database
+                Executors.newSingleThreadExecutor().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.countryDao().deleteAll(mDb.countryDao().getCountries().toArray(new Country[0]));
+                        mDb.countryDao().insertAll(response.body().getCountries().toArray(new Country[0]));
+                        ArrayList<Country> countries = (ArrayList<Country>) mDb.countryDao().getCountries();
+                        // Update the view in CountryAdapter in UI Thread
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.setCountry(countries);
+                                mAdapter.sort(CountryAdapter.SORT_METHOD_NEW);
+                            }
+                        });
+                    }
+                });
             }
-
             @Override
             public void onFailure(Call<Response> call, Throwable t) {
                 Log.d(TAG, "API call fails");
             }
         });
-        // Connect the adapter with the RecyclerView
-        //mRecyclerView.setAdapter(mAdapter);
-
     }
 
     // Called when the user taps the Launch Detail Activity button

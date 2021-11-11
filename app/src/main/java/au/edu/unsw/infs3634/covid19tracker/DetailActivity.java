@@ -1,6 +1,7 @@
 package au.edu.unsw.infs3634.covid19tracker;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.room.Room;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import com.google.gson.Gson;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,6 +30,7 @@ public class DetailActivity extends AppCompatActivity {
     public static final String INTENT_MESSAGE = "au.edu.unsw.infs3634.covid19tracker.intent_message";
     private TextView mCountry, mNewCases, mTotalCases, mNewDeaths, mTotalDeaths, mNewRecovered, mTotalRecovered;
     private ImageView mSearch, mFlag;
+    private CountyDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,9 @@ public class DetailActivity extends AppCompatActivity {
         mSearch = findViewById(R.id.ivSearch);
         mFlag = findViewById(R.id.ivFlag);
 
+        // Instantiate a CountryDatabase object for "country-database"
+        mDb = Room.databaseBuilder(getApplicationContext(),CountyDatabase.class, "country-database").build();
+
         // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -50,19 +56,17 @@ public class DetailActivity extends AppCompatActivity {
             Log.d(TAG, "INTENT_MESSAGE = " + bundle.getStringArrayList(INTENT_MESSAGE) );
             String countryCode = intent.getStringExtra(INTENT_MESSAGE);
 
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://api.covid19api.com/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            CovidService service = retrofit.create(CovidService.class);
-            Call<Response> responseCall = service.getResponse();
-            responseCall.enqueue(new Callback<Response>() {
+            // Create an asynchronous database call using Java Runnable to:
+            // Select the country from the database by countryCode received from MainActivity
+            // Update activity_detail with the country details
+            Executors.newSingleThreadExecutor().execute(new Runnable() {
                 @Override
-                public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
-                    Log.d(TAG, "API call successful");
-                    List<Country> countries = response.body().getCountries();
-                    for(final Country country : countries) {
-                        if (country.getCountryCode().equals(countryCode)) {
+                public void run() {
+                    Country country = mDb.countryDao().getCountry(countryCode);
+                    // Update the view in UI Thread
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
                             DecimalFormat df = new DecimalFormat( "#,###,###,###" );
                             // Set title of the activity
                             setTitle(country.getCountryCode());
@@ -70,7 +74,6 @@ public class DetailActivity extends AppCompatActivity {
                                     .load("https://flagcdn.com/96x72/" + country.getCountryCode().toLowerCase() + ".png")
                                     .fitCenter()
                                     .into(mFlag);
-
                             // Set the country name
                             mCountry.setText(country.getCountry());
                             // Set value for all other text view elements
@@ -89,18 +92,10 @@ public class DetailActivity extends AppCompatActivity {
                                 }
                             });
                         }
-                    }
+                    });
 
-                }
-
-                @Override
-                public void onFailure(Call<Response> call, Throwable t) {
-                    Log.d(TAG, "API call fails");
                 }
             });
-
-
-
         }
     }
 }
