@@ -1,5 +1,6 @@
 package au.edu.unsw.infs3634.covid19tracker;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
@@ -9,10 +10,18 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import java.text.DecimalFormat;
@@ -30,6 +39,7 @@ public class DetailActivity extends AppCompatActivity {
     public static final String INTENT_MESSAGE = "au.edu.unsw.infs3634.covid19tracker.intent_message";
     private TextView mCountry, mNewCases, mTotalCases, mNewDeaths, mTotalDeaths, mNewRecovered, mTotalRecovered;
     private ImageView mSearch, mFlag;
+    private CheckBox mHome;
     private CountyDatabase mDb;
 
     @Override
@@ -45,6 +55,7 @@ public class DetailActivity extends AppCompatActivity {
         mTotalRecovered = findViewById(R.id.tvTotalRecovered);
         mSearch = findViewById(R.id.ivSearch);
         mFlag = findViewById(R.id.ivFlag);
+        mHome = findViewById(R.id.cbHome);
 
         // Instantiate a CountryDatabase object for "country-database"
         mDb = Room.databaseBuilder(getApplicationContext(),CountyDatabase.class, "country-database").build();
@@ -89,6 +100,40 @@ public class DetailActivity extends AppCompatActivity {
                                 public void onClick(View view) {
                                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com.au/search?q=covid " + country.getCountry()));
                                     startActivity(intent);
+                                }
+                            });
+
+                            // Get Firebase Realtime database instance
+                            FirebaseDatabase database = FirebaseDatabase.getInstance();
+                            DatabaseReference messageRef = database.getReference(FirebaseAuth.getInstance().getUid());
+
+                            // Check the check_box if country is set as home country
+                            messageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    String result = (String) snapshot.getValue();
+                                    if (result != null && result.equals(country.getCountryCode())) {
+                                        mHome.setChecked(true);
+                                    } else {
+                                        mHome.setChecked(false);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+
+                            mHome.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    // Set the home country
+                                    if (isChecked) {
+                                        messageRef.setValue(country.getCountryCode());
+                                    } else {
+                                        messageRef.setValue("");
+                                    }
                                 }
                             });
                         }

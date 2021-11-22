@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1075253012104",
+    "project_id": "covid19tracker2-f5925",
+    "storage_bucket": "covid19tracker2-f5925.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075253012104:android:318415d127766b04e4613d",
+        "android_client_info": {
+          "package_name": "au.edu.unsw.infs3634.covid19tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1075253012104-4scjnj2is7fj7qh50fk7li97a7sp1ghu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNDfdukbGk-aYeyHTLCDQNW4qRt6A7l7o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1075253012104-4scjnj2is7fj7qh50fk7li97a7sp1ghu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

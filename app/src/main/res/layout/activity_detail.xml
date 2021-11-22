@@ -131,4 +131,13 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="@+id/tvTotalRecovered"
         app:layout_constraintTop_toTopOf="@+id/tvNewCasesDesc" />
+
+    <CheckBox
+        android:id="@+id/cbHome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="CheckBox"
+        app:layout_constraintStart_toStartOf="@+id/tvTotalRecoveredDesc"
+        app:layout_constraintTop_toBottomOf="@+id/tvTotalRecoveredDesc" />
 </androidx.constraintlayout.widget.ConstraintLayout>

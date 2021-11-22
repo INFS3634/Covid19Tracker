@@ -1,5 +1,6 @@
 package au.edu.unsw.infs3634.covid19tracker;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,7 +16,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SearchView;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -100,6 +108,26 @@ public class MainActivity extends AppCompatActivity {
                             public void run() {
                                 mAdapter.setCountry(countries);
                                 mAdapter.sort(CountryAdapter.SORT_METHOD_NEW);
+                                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                                DatabaseReference messageRef = database.getReference(FirebaseAuth.getInstance().getUid());
+                                messageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        String result = (String) snapshot.getValue();
+                                        if (result != null) {
+                                            for(Country country : countries) {
+                                                if(country.getCountryCode().equals(result)) {
+                                                    Toast.makeText(MainActivity.this, country.getNewConfirmed() + " new cases in " + country.getCountry(), Toast.LENGTH_LONG).show();
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
                             }
                         });
                     }
